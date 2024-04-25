@@ -1,0 +1,105 @@
+@using BookStore.Domain.Entities;
+@model PaginationViewModel<Genre>
+
+@if (User.Identity.IsAuthenticated)
+{
+    <a asp-controller="Genres" asp-action="Create" class="btn btn-primary">
+        <i class='bx bx-plus'></i>
+    </a>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">T/R</th>
+            <th scope="col">Name</th>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <th scope="col">Actions</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0, rowNumber = Model.StartIndex + 1; i < Model.Objects.Count(); i++, rowNumber++)
+        {
+            <tr>
+                <th>@rowNumber</th>
+                <td>@Model.Objects[i].Name</td>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <td>
+                        <a asp-controller="Genres" asp-action="DeleteGenre" asp-route-id="@Model.Objects[i].Id" class="btn btn-danger">
+                            <i class='bx bxs-trash'></i>
+                        </a>
+                        <a asp-controller="Genres" asp-action="Update" asp-route-id="@Model.Objects[i].Id" class="btn btn-secondary">
+                            <i class='bx bxs-edit-alt'></i>
+                        </a>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+<!-- Pagination controls -->
+@if (Model.TotalPages > 1)
+{
+    <div style="display: flex; justify-content: center; align-items: center; gap: 5px">
+        @if (Model.CurrentPage == 1)
+        {
+            <div class="btn btn-primary">1</div>
+        }
+
+        @if (Model.CurrentPage > 1)
+        {
+            <a class="btn btn-outline-primary" href="@Url.Action("Index", new { page = Model.CurrentPage - 1 })"><i class='bx bx-chevrons-left bx-burst'></i></a>
+        }
+
+        @if (Model.CurrentPage != 1)
+        {
+            <a class="btn btn-outline-primary" href="@Url.Action("Index", new { page = 1 })">1</a>
+        }
+
+        @if (Model.CurrentPage > 2)
+        {
+            <span>...</span>
+        }
+
+        @for (int i = Model.CurrentPage - 1; i <= Model.CurrentPage + 1 && i <= Model.TotalPages; i++)
+        {
+            if (i > 1 && i < Model.TotalPages)
+            {
+                if (i == Model.CurrentPage)
+                {
+                    <div class="btn btn-primary">@i</div>
+                }
+                else
+                {
+                    <a class="btn btn-outline-primary" href="@Url.Action("Index", new { page = i })">@i</a>
+                }
+            }
+        }
+
+        @if (Model.CurrentPage < Model.TotalPages - 1)
+        {
+            <span>...</span>
+        }
+
+        @if (Model.TotalPages != Model.CurrentPage && Model.TotalPages > 1)
+        {
+            <a class="btn btn-outline-primary" href="@Url.Action("Index", new { page = Model.TotalPages })">@Model.TotalPages</a>
+        }
+
+        @if (Model.CurrentPage < Model.TotalPages)
+        {
+            <a class="btn btn-outline-primary" href="@Url.Action("Index", new { page = Model.CurrentPage + 1 })"><i class='bx bx-chevrons-right bx-burst'></i></a>
+        }
+
+        @if (Model.CurrentPage == Model.TotalPages)
+        {
+            <div class="btn btn-primary">@Model.CurrentPage</div>
+        }
+    </div>
+}

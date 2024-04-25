@@ -1,0 +1,124 @@
+@using BookStore.Domain.Entities
+@model PaginationViewModel<Book>
+
+@{
+    ViewData["Title"] = "Book";
+}
+
+<form id="searchForm" class="d-flex gap-2 mb-5" asp-controller="Books" asp-action="Index" method="get">
+    <input type="search" id="searchInput" class="form-control" aria-describedby="search" name="text" placeholder="Enter book name...">
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded',
+        function () {
+            const savedQuery = localStorage.getItem('searchQuery');
+            if (savedQuery) {
+                document.getElementById('searchInput').value = savedQuery;
+            }
+
+            document.getElementById('searchInput').focus();
+
+            document.getElementById('searchInput').addEventListener('input', function () {
+                const inputValue = this.value.trim();
+                localStorage.setItem('searchQuery', inputValue);
+                document.getElementById('searchForm').submit();
+            });
+        });
+</script>
+
+@if (User.Identity.IsAuthenticated)
+{
+    <a asp-controller="Books" asp-action="Create" class="btn btn-primary">
+        <i class='bx bx-plus'></i>
+    </a>
+}
+<br />
+<hr />
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    @foreach (var book in Model.Objects)
+    {
+        <div class="col" style="max-width: 300px; padding-top:20px;">
+            <div class="card" style="height: 300px; ">
+                <img src="@book.PhotoPath" class="card-img-left" alt="Book Image" style="max-height: 150px; object-fit: contain;">
+                <div class="card-body">
+                    <h5 class="card-title"><a href="@Url.Action("MoreInfo", new { id = book.Id })">@book.Title</a></h5>
+                    <p class="card-text">Author: <a href="@Url.Action("AuthorDetails", "Authors", new { id = book.Author.Id })">@book.Author.Name</a></p>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a href="@Url.Action("Delete", new { id = book.Id })" class="btn btn-danger">Delete</a>
+                        <a href="@Url.Action("Update", new { id = book.Id })" class="btn btn-secondary">Update</a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+
+
+
+
+
+
+<!-- Pagination controls -->
+@if (Model.TotalPages > 1)
+{
+    <div style="display: flex; justify-content: center; align-items: center; gap: 5px">
+        @if (Model.CurrentPage == 1)
+        {
+            <div class="btn btn-primary">1</div>
+        }
+
+        @if (Model.CurrentPage > 1)
+        {
+            <a class="btn btn-outline-primary" href="@Url.Action("Index", new { page = Model.CurrentPage - 1 })"><i class='bx bx-chevrons-left bx-burst'></i></a>
+        }
+
+        @if (Model.CurrentPage != 1)
+        {
+            <a class="btn btn-outline-primary" href="@Url.Action("Index", new { page = 1 })">1</a>
+        }
+
+        @if (Model.CurrentPage > 2)
+        {
+            <span>...</span>
+        }
+
+        @for (int i = Model.CurrentPage - 1; i <= Model.CurrentPage + 1 && i <= Model.TotalPages; i++)
+        {
+            if (i > 1 && i < Model.TotalPages)
+            {
+                if (i == Model.CurrentPage)
+                {
+                    <div class="btn btn-primary">@i</div>
+                }
+                else
+                {
+                    <a class="btn btn-outline-primary" href="@Url.Action("Index", new { page = i })">@i</a>
+                }
+            }
+        }
+
+        @if (Model.CurrentPage < Model.TotalPages - 1)
+        {
+            <span>...</span>
+        }
+
+        @if (Model.TotalPages != Model.CurrentPage && Model.TotalPages > 1)
+        {
+            <a class="btn btn-outline-primary" href="@Url.Action("Index", new { page = Model.TotalPages })">@Model.TotalPages</a>
+        }
+
+        @if (Model.CurrentPage < Model.TotalPages)
+        {
+            <a class="btn btn-outline-primary" href="@Url.Action("Index", new { page = Model.CurrentPage + 1 })"><i class='bx bx-chevrons-right bx-burst'></i></a>
+        }
+
+        @if (Model.CurrentPage == Model.TotalPages)
+        {
+            <div class="btn btn-primary">@Model.CurrentPage</div>
+        }
+    </div>
+}
